@@ -135,55 +135,20 @@ if (reversed == null) { reversed = false; }
 	this.actionFrames = [0,54,89];
 	// timeline functions:
 	this.frame_0 = function() {
-		// ==== SETUP ====
-		const stageRef = this; // referensi stage Animate
-		let isDrawing = false;
-		let maskShape = new createjs.Shape();
-		let overlay = this.overlay; // instance overlay di Animate (warna gelap)
-		let targetRevealPercent = 85; // target % terbuka sebelum pindah frame
-		let checkInterval;
-		let revealed = false;
-		
-		// Set awal: overlay pakai masking
-		overlay.mask = maskShape;
-		
-		// Saat mouse/touch down
-		stageRef.on("stagemousedown", function(evt) {
-		    isDrawing = true;
-		    drawDot(evt.stageX, evt.stageY);
-		});
-		
-		// Saat mouse/touch move
-		stageRef.on("stagemousemove", function(evt) {
-		    if (isDrawing) {
-		        drawDot(evt.stageX, evt.stageY);
-		    }
-		});
-		
-		// Saat mouse/touch up
-		stageRef.on("stagemouseup", function(evt) {
-		    isDrawing = false;
-		});
-		
-		// Fungsi gambar lingkaran gosokan
-		function drawDot(x, y) {
-		    maskShape.graphics.beginFill("#000").drawCircle(x, y, 20); // radius lingkaran gosokan
-		}
-		
-		// ==== CEK PERSENTASE TERBUKA ====
-		checkInterval = setInterval(function() {
+		createjs.Ticker.on("tick", function() {
 		    if (revealed) return;
 		
-		    // Ambil pixel data canvas (hanya untuk cek area terbuka)
-		    let ctx = stageRef.canvas.getContext("2d");
-		    let imgData = ctx.getImageData(overlay.x, overlay.y, overlay.image.width, overlay.image.height).data;
+		    let canvas = stageRef.stage.canvas;
+		    if (!canvas) return; // canvas belum siap
+		
+		    let ctx = canvas.getContext("2d");
+		    let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 		
 		    let transparentPixels = 0;
 		    let totalPixels = imgData.length / 4;
 		
-		    // Hitung pixel transparan
 		    for (let i = 3; i < imgData.length; i += 4) {
-		        if (imgData[i] < 128) { // alpha kurang dari setengah
+		        if (imgData[i] < 128) {
 		            transparentPixels++;
 		        }
 		    }
@@ -192,10 +157,9 @@ if (reversed == null) { reversed = false; }
 		
 		    if (percent >= targetRevealPercent) {
 		        revealed = true;
-		        clearInterval(checkInterval);
-		        stageRef.gotoAndPlay("win"); // pindah frame label 'win'
+		        stageRef.gotoAndPlay("win");
 		    }
-		}, 500); // cek setiap 0.5 detik
+		});
 	}
 	this.frame_54 = function() {
 		this.stop();
@@ -228,7 +192,7 @@ if (reversed == null) { reversed = false; }
 	// Layer_2
 	this.overlay = new lib.overlay();
 	this.overlay.name = "overlay";
-	this.overlay.setTransform(160,240);
+	this.overlay.setTransform(160,240,0.9695,0.9745);
 
 	this.timeline.addTween(cjs.Tween.get(this.overlay).to({_off:true},55).wait(35));
 
@@ -241,7 +205,7 @@ if (reversed == null) { reversed = false; }
 	this._renderFirstFrame();
 
 }).prototype = p = new lib.AnMovieClip();
-p.nominalBounds = new cjs.Rectangle(0,0,325.1,486.3);
+p.nominalBounds = new cjs.Rectangle(0,0,320,480);
 // library properties:
 lib.properties = {
 	id: 'CF738CA085FB8244A5EC4E7294895F6C',
